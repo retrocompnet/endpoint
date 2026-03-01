@@ -20,11 +20,62 @@
 package main
 
 import (
-	"fmt"
+	"embed"
+	"flag"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gorilla/mux"
 )
 
-const VERSION = "0.0.1"
+var (
+	//go:embed static
+	statics embed.FS
+	//go:embed tmpl
+	templates embed.FS
+	//  //go:embed db/migrations
+	//  migrations embed.FS
+
+	Flag_Port     = flag.Int("port", 80, "The port to listen on")
+	Flag_DataPath = flag.String("data-path", "/home/rcn/data", "The path to persistent user data storage")
+)
+
+const RcnEndpointVersion = "0.0.1"
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s", r.Method, r.RequestURI)
+	})
+}
 
 func main() {
-	fmt.Println("RCN Endpoint version", VERSION)
+	log.Printf("RCN Endpoint v%s starting...", RcnEndpointVersion)
+	flag.Parse()
+
+	router := mux.NewRouter()
+	router.PathPrefix("/static/").Handler(
+		http.FileServer(http.FS(statics)))
+	router.Handle("/favicon.ico",
+		http.RedirectHandler("/static/images/favicon.ico", 302))
+	router.Use(loggingMiddleware)
+
+	server := &http.Server{
+		Handler:      router,
+		Addr:         ":" + strconv.Itoa(*Flag_Port),
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	// dbconn, err := db.New(migrations)
+	// if err != nil {
+	//   log.Fatal(err)
+	// }
+	// if err := dbconn.ApplyMigrations(); err != nil {
+	//   log.Fatal(err)
+	// }
+
+	log.Fatal(server.ListenAndServe())
 }

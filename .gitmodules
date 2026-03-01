@@ -1,0 +1,3 @@
+[submodule "third_party/github.com/gorilla/mux/bare"]
+	path = third_party/github.com/gorilla/mux/mux
+	url = https://github.com/gorilla/mux
