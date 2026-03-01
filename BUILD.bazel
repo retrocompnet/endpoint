@@ -1,0 +1,16 @@
+load("@rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "endpoint_lib",
+    srcs = ["endpoint.go"],
+    importpath = "retrocomp.network/endpoint",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "endpoint",
+    embed = [":endpoint_lib"],
+    deps = ["//librcn-api:go"],
+    visibility = ["//visibility:public"],
+)
