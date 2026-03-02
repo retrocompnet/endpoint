@@ -3,6 +3,11 @@ load("@rules_go//go:def.bzl", "go_library")
 go_library(
     name = "db",
     srcs = ["db.go"],
+    embedsrcs = [
+        "migrations/0000_base.sql",
+        "migrations/0001_settings.sql",
+    ],
     importpath = "gazelle/endpoint/db",
     visibility = ["//visibility:public"],
+    deps = ["@org_modernc_sqlite//:sqlite"],
 )

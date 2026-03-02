@@ -20,12 +20,39 @@
 package db
 
 import (
+	"embed"
+	"log"
+	
+	"database/sql"
+	_ "modernc.org/sqlite"
 )
 
 type Database struct {
 	SchemaVersion int
 	LatestMigration int
 
-	connection *gorqlite.Connection
+	db *sql.DB
+}
+
+var (
+	//go:embed migrations
 	migrations embed.FS
+)
+
+func New(dbfile string) (*Database, error) {
+	log.Print("Opening sqlite db ", dbfile)
+	db, err := sql.Open("sqlite", dbfile)
+	if err != nil {
+		return nil, err
+	}
+
+	version := -1
+	result := db.QueryRow("SELECT db_version FROM Migration LIMIT 1")
+	_ = result.Scan(&version)
+
+	return &Database{
+		SchemaVersion: version,
+		LatestMigration: 0,
+		db: db,
+	}, nil
 }
