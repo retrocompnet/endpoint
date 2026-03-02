@@ -4,6 +4,7 @@ go_library(
     name = "endpoint_lib",
     srcs = ["endpoint.go"],
     embedsrcs = [
+        "static/css/base.css",
         "static/css/bootstrap.css",
         "static/css/bootstrap.css.map",
         "static/css/bootstrap.min.css",
@@ -25,10 +26,15 @@ go_library(
         "static/js/bootstrap.js",
         "static/js/bootstrap.min.js",
         "tmpl/base.tmpl",
+        "tmpl/dashboard.tmpl",
     ],
     importpath = "gazelle/endpoint",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_gorilla_mux//:mux"],
+    deps = [
+        "//endpoint/controllers:endpoint_lib",
+        "//endpoint/db",
+        "@com_github_gorilla_mux//:mux",
+    ],
 )
 
 go_binary(
